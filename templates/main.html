@@ -2,15 +2,85 @@
 
     <head>
         <title>Stockgame</title>
-        <link href="main.css" rel="stylesheet" type="text/css"/>
+        <link href="/statics/main.css" rel="stylesheet" type="text/css"/>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     </head>
 
-    <body>
-        <div>
-            <form action="." method="POST">
-                <textarea name="contents" placeholder="Enter a comment"></textarea>
-                <input type="submit" value="Post comment">
+    <body id="app">
+
+        <div id="action-panel">
+            <div id="date-budget">
+                <h1>8 June 1998</h1>
+                <h1>Budget: 999.88</h1>
+            </div>
+
+
+            <form>
+
+                <div id="new-stocks">
+                    <div class="new-stock-row">
+                        <h2>Option</h2>
+                        <input type="text" class="new-stock-input" placeholder="0.00">
+                    </div>
+                    <div class="new-stock-row">
+                        <h2>Option2</h2>
+                        <input type="text" class="new-stock-input" placeholder="0.00">
+                    </div>
+                    <div class="new-stock-row">
+                        <h2>Option3</h2>
+                        <input type="text" class="new-stock-input" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div id="owned-stocks">
+                    <div class="owned-stock-row">
+                        <h2>Owned</h2>
+                        <h2>Amount</h2>
+                        <h2>Price</h2>
+                    </div>
+                    <div class="owned-stock-row">
+                        <h2>Owned</h2>
+                        <h2>Amount</h2>
+                        <h2>Price</h2>
+                    </div>
+                </div>
+
+                <div id="increment">
+                    <button>Increment</button>
+                </div>
+
             </form>
+
+
         </div>
+        <div id="graph-panel">
+            <canvas id="lineChart"></canvas>
+            <script>
+                var ctx = document.getElementById("lineChart").getContext("2d");
+                var lineChart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: {{ labels | safe}},
+                        datasets: [
+                            {
+                                label: "Data points",
+                                data: {{values | safe}},
+                                fill: false,
+                                borderColor: "rgb(75, 192, 192)",
+                                lineTension: 0.1
+
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                })
+            </script>
+        </div>
+
+
+        <!-- {% for option in options %} -->
+        <!-- {% endfor %} -->
     </body>
 </html>
