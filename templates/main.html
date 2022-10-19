@@ -7,80 +7,71 @@
     </head>
 
     <body id="app">
-
         <div id="action-panel">
             <div id="date-budget">
-                <h1>8 June 1998</h1>
-                <h1>Budget: 999.88</h1>
+                <h1 id="date">{{ currentDate }}</h1>
+                <h1 id="budget"><span id="dollar-fade">$</span>{{ budget }}</h1>
             </div>
-
-
             <form>
-
                 <div id="new-stocks">
+                    {% for option in options: %}
                     <div class="new-stock-row">
-                        <h2>Option</h2>
+                        <h2>{{ option }}</h2>
                         <input type="text" class="new-stock-input" placeholder="0.00">
                     </div>
-                    <div class="new-stock-row">
-                        <h2>Option2</h2>
-                        <input type="text" class="new-stock-input" placeholder="0.00">
-                    </div>
-                    <div class="new-stock-row">
-                        <h2>Option3</h2>
-                        <input type="text" class="new-stock-input" placeholder="0.00">
-                    </div>
+                    {% endfor %}
                 </div>
-
                 <div id="owned-stocks">
                     <div class="owned-stock-row">
                         <h2>Owned</h2>
                         <h2>Amount</h2>
                         <h2>Price</h2>
+                        <button class="sell">Sell</button>
                     </div>
                     <div class="owned-stock-row">
                         <h2>Owned</h2>
                         <h2>Amount</h2>
                         <h2>Price</h2>
+                        <button class="sell">Sell</button>
                     </div>
                 </div>
-
-                <div id="increment">
-                    <button>Increment</button>
-                </div>
-
+                <button id="increment">Increment</button>
             </form>
-
-
         </div>
+
         <div id="graph-panel">
             <canvas id="lineChart"></canvas>
             <script>
                 var ctx = document.getElementById("lineChart").getContext("2d");
                 var lineChart = new Chart(ctx, {
-                    type: "line",
                     data: {
-                        labels: {{ labels | safe}},
+                        {% if not activeGame %}
+                        labels: {{ exampleLabels | safe}},
                         datasets: [
                             {
-                                label: "Data points",
-                                data: {{values | safe}},
+                                type: 'line',
+                                data: {{exampleValues | safe}},
                                 fill: false,
                                 borderColor: "rgb(75, 192, 192)",
                                 lineTension: 0.1
 
                             }
+                        {% else %}
+                        {% endif %}
                         ]
                     },
                     options: {
-                        responsive: true
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
                 })
             </script>
         </div>
-
-
-        <!-- {% for option in options %} -->
-        <!-- {% endfor %} -->
+        {% if not activeGame %}
+        <div style="position: absolute; width: 100%; height: 100%; backdrop-filter: blur(10px); z-index: 10;"></div>
+        <form action="/startGame" method="post">
+            <button type="submit" style="position: absolute; backdrop-filter: blur(100px); width: 15%; height: 10%; background-color: #191919; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; border: 5px solid #353535; min-width: 200px;">Start Game</button>
+        </form>
+        {% endif %}
     </body>
 </html>
