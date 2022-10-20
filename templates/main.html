@@ -12,12 +12,12 @@
                 <h1 id="date">{{ currentDate }}</h1>
                 <h1 id="budget"><span id="dollar-fade">$</span>{{ budget }}</h1>
             </div>
-            <form>
+            <form action="/increment" method="post">
                 <div id="new-stocks">
                     {% for option in options: %}
                     <div class="new-stock-row">
-                        <h2>{{ option }}</h2>
-                        <input type="text" class="new-stock-input" placeholder="0.00">
+                        <h2>{{ option[0] }} <span>({{ option[1] }})</span></h2>
+                        <input type="text" class="new-stock-input" placeholder="0.00" name={{ option[2] }}>
                     </div>
                     {% endfor %}
                 </div>
@@ -35,7 +35,7 @@
                         <button class="sell">Sell</button>
                     </div>
                 </div>
-                <button id="increment">Increment</button>
+                <button type="submit" id="increment">Increment</button>
             </form>
         </div>
 
