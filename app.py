@@ -15,24 +15,26 @@ exampleValues = [row[1] for row in exampleData]
 
 def getInitialDate():
     currentDate = datetime.date(1970 + round((rand.random() * 10)), round((rand.random() * 11)) + 1, round((rand.random() * 27)) + 1)
-    while currentDate.weekday() > 4:
-        currentDate = currentDate.replace(day=round((rand.random() * 27)))
     return currentDate
+
+def getPrice(stock, date):
+    currentDateTime = datetime.datetime.fromordinal(date.toordinal())
+    endDate = currentDateTime + datetime.timedelta(days=7)
+    currentTicker = yf.Ticker(stock)
+    hist = currentTicker.history(interval="1d", start=currentDateTime, end=endDate)
+    currentPrice = format(round(hist['Close'].iloc[0], 2), '.2f')
+    return currentPrice
 
 def getOptions(date):
     options = []
     existingStocks = []
-    currentDateTime = datetime.datetime.fromordinal(date.toordinal())
-    endDate = currentDateTime + datetime.timedelta(days=1)
     for stock in stockDate:
         if datetime.datetime.strptime(stockDate[stock], '%Y-%m-%d').date() < date:
             existingStocks.append(stock)
     for i in range(3):
         options.append(existingStocks[rand.randrange(len(existingStocks))])
     for idx, option in enumerate(options):
-        currentTicker = yf.Ticker(option)
-        hist = currentTicker.history(interval="1d", start=currentDateTime, end=endDate)
-        currentPrice = format(round(hist['Close'].iloc[0], 2), '.2f')
+        currentPrice = getPrice(option, date)
         options[idx] = (option, idx, currentPrice)
     return options
 
@@ -44,7 +46,7 @@ def main():
 
     #Main app interface
     if 'activeGame' in session and session['activeGame']:
-        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'])
+        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'])
     else:
         session['activeGame'] = False
         return render_template("main.html", activeGame=session['activeGame'], exampleValues=exampleValues, exampleLabels=exampleLabels)
@@ -64,27 +66,29 @@ def startGame():
 @app.route('/increment', methods=["POST"])
 def increment():
 
+    #Add bought stocks to ownedStocks (Stock, shares, price rn)
+
+    for input in ['0', '1', '2']:
+        investment = float(request.form[input]) if request.form[input] else 0
+        currentPrice = float(session['options'][int(input)][-1])
+        amntShares = investment // currentPrice
+        pricePaid = amntShares * currentPrice
+        session['budget'] = format(float(session['budget']) - pricePaid, '.2f')
+        if amntShares >= 1:
+            session['ownedStocks'].append([session['options'][int(input)][0], int(amntShares), [currentPrice]])
+
     #Increment currentDate (2-5 years)
+
     currentDate = datetime.datetime.strptime(session['currentDate'], '%d %B %Y')
     currentDate = currentDate.replace(day=(round((rand.random() * 27)) + 1), month=(round((rand.random() * 11)) + 1), year=(currentDate.year + round(rand.random() * 3) + 2))
-    while currentDate.weekday() > 4:
-        currentDate = currentDate.replace(day=round((rand.random() * 27)))
     session['currentDate'] = currentDate.strftime('%d %B %Y')
 
-    #Add bought stocks to ownedStocks
-    #Get current price and floor divide request.form by that price to get resulting amount of shares
-    #Modulo it to give remainder (put back into budget)
-    #Subtract from budget the floor divided number multipled by the price of stock
-    for input in ['0', '1', '2']:
-        if request.form[input] == '':
-           request.form[input] = '0'
-        amntShares = session['options'][int(input)][-1] // request.form[input]
-        pricePaid = amntShares * session['options'][int(input)]
-        session['budget'] -= pricePaid
-        #session['ownedStocks'].append()
+    #Add new prices to ownedStocks
 
-        
-    
 
-    #MUST UPDATE CURRENTDATE, OPTIONS, BUDGET, OWNEDSTOCKS
+    #Update options
+    session['options'] = getOptions(currentDate.date())
+
+    #Do graph stuff
+
     return redirect('/')

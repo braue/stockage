@@ -16,24 +16,20 @@
                 <div id="new-stocks">
                     {% for option in options: %}
                     <div class="new-stock-row">
-                        <h2>{{ option[0] }} <span>({{ option[1] }})</span></h2>
-                        <input type="text" class="new-stock-input" placeholder="0.00" name={{ option[2] }}>
+                        <h2>{{ option[0] }} <span>({{ option[2] }})</span></h2>
+                        <input type="text" class="new-stock-input" placeholder="0.00" name={{ option[1] }}>
                     </div>
                     {% endfor %}
                 </div>
                 <div id="owned-stocks">
+                    {% for stock in ownedStocks: %}
                     <div class="owned-stock-row">
-                        <h2>Owned</h2>
-                        <h2>Amount</h2>
-                        <h2>Price</h2>
+                        <h2>{{ stock[0] }}</h2>
+                        <h2>{{ stock[1] }}</h2>
+                        <h2>{{ stock[2] }}</h2>
                         <button class="sell">Sell</button>
                     </div>
-                    <div class="owned-stock-row">
-                        <h2>Owned</h2>
-                        <h2>Amount</h2>
-                        <h2>Price</h2>
-                        <button class="sell">Sell</button>
-                    </div>
+                    {% endfor %}
                 </div>
                 <button type="submit" id="increment">Increment</button>
             </form>
@@ -44,8 +40,9 @@
             <script>
                 var ctx = document.getElementById("lineChart").getContext("2d");
                 var lineChart = new Chart(ctx, {
+                    type: 'line',
                     data: {
-                        {% if not activeGame %}
+                        {% if not activeGame: %}
                         labels: {{ exampleLabels | safe}},
                         datasets: [
                             {
@@ -56,21 +53,38 @@
                                 lineTension: 0.1
 
                             }
-                        {% else %}
-                        {% endif %}
                         ]
+                        {% endif %}
+
+                        {% if activeGame and not ownedStocks: %}
+                        labels: [""],
+                        datasets: [
+                            {
+                                label: "",
+                                type: 'line',
+                                data: [],
+                                fill: false,
+                            }
+                        ]
+                        {% endif %}
+
+                        {% if activeGame and ownedStocks: %}
+                        
+                        {% endif %}
                     },
+
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false
+                        maintainAspectRatio: false,
                     }
+
                 })
             </script>
         </div>
-        {% if not activeGame %}
-        <div style="position: absolute; width: 100%; height: 100%; backdrop-filter: blur(10px); z-index: 10;"></div>
+        {% if not activeGame: %}
+        <div id="start-blur"></div>
         <form action="/startGame" method="post">
-            <button type="submit" style="position: absolute; backdrop-filter: blur(100px); width: 15%; height: 10%; background-color: #191919; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; border: 5px solid #353535; min-width: 200px;">Start Game</button>
+            <button type="submit" id="start-button">Start Game</button>
         </form>
         {% endif %}
     </body>
