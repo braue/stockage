@@ -9,7 +9,9 @@
     <body id="app">
         <div id="action-panel">
             <div id="date-budget">
-                <h1 id="date">{{ currentDate }}</h1>
+                {% if activeGame: %}
+                <h1 id="date">{{ currentDate[0] }}</h1>
+                {% endif %}
                 <h1 id="budget"><span id="dollar-fade">$</span>{{ budget }}</h1>
             </div>
             <form action="/increment" method="post">
@@ -26,7 +28,7 @@
                     <div class="owned-stock-row">
                         <h2>{{ stock[0] }}</h2>
                         <h2>{{ stock[1] }}</h2>
-                        <h2>{{ stock[2] }}</h2>
+                        <h2>{{ stock[2][-1] }}</h2>
                         <button class="sell">Sell</button>
                     </div>
                     {% endfor %}
@@ -38,47 +40,79 @@
         <div id="graph-panel">
             <canvas id="lineChart"></canvas>
             <script>
+                {% if not activeGame: %}
+                mydata = {
+                    labels: {{exampleLabels | safe}},
+                    datasets: [
+                        {
+                            type: 'line',
+                            data: {{exampleValues | safe}},
+                            fill: false,
+                            borderColor: "rgb(75, 192, 192)",
+                            lineTension: 0.1
+
+                        }
+                    ]
+                }
+                {% endif %}
+
+                {% if activeGame and not ownedStocks: %}
+                mydata = {
+                    labels: [""],
+                    datasets: [
+                        {
+                            label: "",
+                            type: 'line',
+                            data: [],
+                            fill: false,
+                        }
+                    ]
+                }
+                {% endif %}
+
+                {% if activeGame and ownedStocks: %}
+                var labelworkaround = [];
+                {% for date in datesPast: %}
+                labelworkaround.push('{{ date }}')
+                {% endfor %}
+                labelworkaround.push('{{ currentDate[1] }}')
+                var mydatasets = []
+                {% for stock in ownedStocks: %}
+                mydata = []
+                {% for value in stock[2]: %}
+                if('{{value}}' == 'null'){
+                    mydata.push(null);
+                } else {
+                    mydata.push({{value}});
+                }
+                {% endfor %}
+                mydatasets.push({
+                    label: '{{ stock[0] }}',
+                    type: 'line',
+                    data: mydata,
+                    fill: false,
+                    borderColor: "rgb(75, 200, 192)",
+                    lineTension: 0.1
+                })
+                {% endfor %}
+                mydata = {
+                    labels: labelworkaround,
+                    datasets: mydatasets
+                }
+                {% endif %}
+
+                myoptions = {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+
                 var ctx = document.getElementById("lineChart").getContext("2d");
                 var lineChart = new Chart(ctx, {
                     type: 'line',
-                    data: {
-                        {% if not activeGame: %}
-                        labels: {{ exampleLabels | safe}},
-                        datasets: [
-                            {
-                                type: 'line',
-                                data: {{exampleValues | safe}},
-                                fill: false,
-                                borderColor: "rgb(75, 192, 192)",
-                                lineTension: 0.1
-
-                            }
-                        ]
-                        {% endif %}
-
-                        {% if activeGame and not ownedStocks: %}
-                        labels: [""],
-                        datasets: [
-                            {
-                                label: "",
-                                type: 'line',
-                                data: [],
-                                fill: false,
-                            }
-                        ]
-                        {% endif %}
-
-                        {% if activeGame and ownedStocks: %}
-                        
-                        {% endif %}
+                    data: mydata,
+                    options: myoptions
                     },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                    }
-
-                })
+                )
             </script>
         </div>
         {% if not activeGame: %}

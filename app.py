@@ -46,7 +46,7 @@ def main():
 
     #Main app interface
     if 'activeGame' in session and session['activeGame']:
-        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'])
+        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'], datesPast=session['datesPast'])
     else:
         session['activeGame'] = False
         return render_template("main.html", activeGame=session['activeGame'], exampleValues=exampleValues, exampleLabels=exampleLabels)
@@ -56,17 +56,18 @@ def startGame():
     
     #Initialize session values
     currentDate = getInitialDate()
-    session['currentDate'] = currentDate.strftime('%d %B %Y')
+    session['currentDate'] = [currentDate.strftime('%d %B %Y'), currentDate.strftime('%m/%d/%Y') ]
     session['options'] = getOptions(currentDate)
     session['budget'] = format(1000.00, '.2f')
     session['ownedStocks'] = []
+    session['datesPast'] = []
     session['activeGame'] = True
     return redirect('/')
 
 @app.route('/increment', methods=["POST"])
 def increment():
 
-    #Add bought stocks to ownedStocks (Stock, shares, price rn)
+    session['datesPast'].append(session['currentDate'][1])
 
     for input in ['0', '1', '2']:
         investment = float(request.form[input]) if request.form[input] else 0
@@ -75,20 +76,24 @@ def increment():
         pricePaid = amntShares * currentPrice
         session['budget'] = format(float(session['budget']) - pricePaid, '.2f')
         if amntShares >= 1:
-            session['ownedStocks'].append([session['options'][int(input)][0], int(amntShares), [currentPrice]])
+            priceList = ['null' for i in range(len(session['datesPast']) - 1)]
+            priceList.append(currentPrice)
+            session['ownedStocks'].append([session['options'][int(input)][0], int(amntShares), priceList])
 
     #Increment currentDate (2-5 years)
 
-    currentDate = datetime.datetime.strptime(session['currentDate'], '%d %B %Y')
+    currentDate = datetime.datetime.strptime(session['currentDate'][0], '%d %B %Y')
     currentDate = currentDate.replace(day=(round((rand.random() * 27)) + 1), month=(round((rand.random() * 11)) + 1), year=(currentDate.year + round(rand.random() * 3) + 2))
-    session['currentDate'] = currentDate.strftime('%d %B %Y')
+    session['currentDate'][0] = currentDate.strftime('%d %B %Y')
+    session['currentDate'][1] = currentDate.strftime('%m/%d/%Y')
 
     #Add new prices to ownedStocks
 
+    for stock in session['ownedStocks']:
+        currentPrice = getPrice(stock[0], currentDate.date())
+        stock[2].append(float(currentPrice))
 
     #Update options
     session['options'] = getOptions(currentDate.date())
-
-    #Do graph stuff
 
     return redirect('/')
