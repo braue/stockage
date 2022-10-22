@@ -14,7 +14,7 @@
                 {% endif %}
                 <h1 id="budget"><span id="dollar-fade">$</span>{{ budget }}</h1>
             </div>
-            <form action="/increment" method="post">
+            <form>
                 <div id="new-stocks">
                     {% for option in options: %}
                     <div class="new-stock-row">
@@ -29,11 +29,11 @@
                         <h2>{{ stock[0] }}</h2>
                         <h2>{{ stock[1] }}</h2>
                         <h2>{{ stock[2][-1] }}</h2>
-                        <button class="sell">Sell</button>
+                        <button class="sell" formaction="sell" formmethod="post" name="sell" value={{ stock[3] }}>Sell</button>
                     </div>
                     {% endfor %}
                 </div>
-                <button type="submit" id="increment">Increment</button>
+                <button type="submit" id="increment" formaction="/increment" formmethod="post">Increment</button>
             </form>
         </div>
 
@@ -119,6 +119,13 @@
         <div id="start-blur"></div>
         <form action="/startGame" method="post">
             <button type="submit" id="start-button">Start Game</button>
+        </form>
+        {% endif %}
+        {% if finished: %}
+        <div id="start-blur"></div>
+        <form action="/endGame" method="post">
+            <h1 id="final-budget">{{ budget }}</h1>
+            <button type="submit" id="start-button">End Game</button>
         </form>
         {% endif %}
     </body>

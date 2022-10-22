@@ -187,3 +187,8 @@ button {
     backdrop-filter: blur(10px); 
     z-index: 10;
 }
+
+#final-budget {
+    z-index: 11;
+    position: absolute;
+}

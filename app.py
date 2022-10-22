@@ -3,9 +3,7 @@ import yfinance as yf
 import json
 import datetime
 import random as rand
-
-with open("./data/stockdate.json") as infile:
-   stockDate = json.load(infile)
+from functions import getInitialDate, getPrice, getOptions
 
 with open("./data/example.json") as infile:
     exampleData = json.load(infile)
@@ -13,40 +11,14 @@ with open("./data/example.json") as infile:
 exampleLabels = [row[0] for row in exampleData]
 exampleValues = [row[1] for row in exampleData]
 
-def getInitialDate():
-    currentDate = datetime.date(1970 + round((rand.random() * 10)), round((rand.random() * 11)) + 1, round((rand.random() * 27)) + 1)
-    return currentDate
-
-def getPrice(stock, date):
-    currentDateTime = datetime.datetime.fromordinal(date.toordinal())
-    endDate = currentDateTime + datetime.timedelta(days=7)
-    currentTicker = yf.Ticker(stock)
-    hist = currentTicker.history(interval="1d", start=currentDateTime, end=endDate)
-    currentPrice = format(round(hist['Close'].iloc[0], 2), '.2f')
-    return currentPrice
-
-def getOptions(date):
-    options = []
-    existingStocks = []
-    for stock in stockDate:
-        if datetime.datetime.strptime(stockDate[stock], '%Y-%m-%d').date() < date:
-            existingStocks.append(stock)
-    for i in range(3):
-        options.append(existingStocks[rand.randrange(len(existingStocks))])
-    for idx, option in enumerate(options):
-        currentPrice = getPrice(option, date)
-        options[idx] = (option, idx, currentPrice)
-    return options
-
 app = Flask(__name__, template_folder='templates', static_folder='statics')
 app.secret_key = "SUPA_SECRET"
 
 @app.route('/', methods=["GET"])
 def main():
 
-    #Main app interface
     if 'activeGame' in session and session['activeGame']:
-        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'], datesPast=session['datesPast'])
+        return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'], datesPast=session['datesPast'], finished=session['finished'])
     else:
         session['activeGame'] = False
         return render_template("main.html", activeGame=session['activeGame'], exampleValues=exampleValues, exampleLabels=exampleLabels)
@@ -54,7 +26,6 @@ def main():
 @app.route('/startGame', methods=["POST"])
 def startGame():
     
-    #Initialize session values
     currentDate = getInitialDate()
     session['currentDate'] = [currentDate.strftime('%d %B %Y'), currentDate.strftime('%m/%d/%Y') ]
     session['options'] = getOptions(currentDate)
@@ -62,38 +33,64 @@ def startGame():
     session['ownedStocks'] = []
     session['datesPast'] = []
     session['activeGame'] = True
+    session['finished'] = False
     return redirect('/')
 
 @app.route('/increment', methods=["POST"])
 def increment():
 
-    session['datesPast'].append(session['currentDate'][1])
-
+    currentPrices = []
+    amntsShares = []
+    paidList = []
     for input in ['0', '1', '2']:
         investment = float(request.form[input]) if request.form[input] else 0
         currentPrice = float(session['options'][int(input)][-1])
+        currentPrices.append(currentPrice)
         amntShares = investment // currentPrice
+        amntsShares.append(amntShares)
         pricePaid = amntShares * currentPrice
-        session['budget'] = format(float(session['budget']) - pricePaid, '.2f')
-        if amntShares >= 1:
-            priceList = ['null' for i in range(len(session['datesPast']) - 1)]
-            priceList.append(currentPrice)
-            session['ownedStocks'].append([session['options'][int(input)][0], int(amntShares), priceList])
+        paidList.append(pricePaid)
+    if sum(paidList) > float(session['budget']):
+        return redirect('/')
+    
+    session['datesPast'].append(session['currentDate'][1])
 
-    #Increment currentDate (2-5 years)
+    for input in ['0', '1', '2']:
+        session['budget'] = format(float(session['budget']) - paidList[int(input)], '.2f')
+        if amntsShares[int(input)] >= 1:
+            priceList = ['null' for i in range(len(session['datesPast']) - 1)]
+            priceList.append(currentPrices[int(input)])
+            session['ownedStocks'].append([session['options'][int(input)][0], int(amntsShares[int(input)]), priceList, len(session['ownedStocks'])])
 
     currentDate = datetime.datetime.strptime(session['currentDate'][0], '%d %B %Y')
     currentDate = currentDate.replace(day=(round((rand.random() * 27)) + 1), month=(round((rand.random() * 11)) + 1), year=(currentDate.year + round(rand.random() * 3) + 2))
+    if currentDate >= datetime.datetime.today():
+        session['finished'] = True
+        for i in range(len(session['ownedStocks'])):
+            session['budget'] = format(float(session['budget']) + session['ownedStocks'][i][1] * session['ownedStocks'][i][2][-1], '.2f')
+            session['ownedStocks'].pop(i)
+        return redirect('/')
     session['currentDate'][0] = currentDate.strftime('%d %B %Y')
     session['currentDate'][1] = currentDate.strftime('%m/%d/%Y')
 
-    #Add new prices to ownedStocks
-
     for stock in session['ownedStocks']:
-        currentPrice = getPrice(stock[0], currentDate.date())
-        stock[2].append(float(currentPrice))
+        try:
+            currentPrice = getPrice(stock[0], currentDate.date())
+            stock[2].append(float(currentPrice))
+        except:
+            stock[2].append('null')
 
-    #Update options
     session['options'] = getOptions(currentDate.date())
 
+    return redirect('/')
+
+@app.route('/sell', methods=["POST"])
+def sell():
+    session['budget'] = format(float(session['budget']) + session['ownedStocks'][int(request.form['sell'])][1] * session['ownedStocks'][int(request.form['sell'])][2][-1], '.2f')
+    session['ownedStocks'].pop(int(request.form['sell']))
+    return redirect('/')
+
+@app.route('/endGame', methods=["POST"])
+def endGame():
+    session['activeGame'] = False
     return redirect('/')
