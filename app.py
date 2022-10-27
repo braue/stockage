@@ -21,7 +21,8 @@ def main():
         return render_template("main.html", activeGame=session['activeGame'], currentDate=session['currentDate'], budget=session['budget'], options=session['options'], ownedStocks=session['ownedStocks'], datesPast=session['datesPast'], finished=session['finished'])
     else:
         session['activeGame'] = False
-        return render_template("main.html", activeGame=session['activeGame'], exampleValues=exampleValues, exampleLabels=exampleLabels)
+        session['finished'] = [False, None]
+        return render_template("main.html", activeGame=session['activeGame'], finished=session['finished'], exampleValues=exampleValues, exampleLabels=exampleLabels)
 
 @app.route('/startGame', methods=["POST"])
 def startGame():
@@ -33,7 +34,6 @@ def startGame():
     session['ownedStocks'] = []
     session['datesPast'] = []
     session['activeGame'] = True
-    session['finished'] = False
     return redirect('/')
 
 @app.route('/increment', methods=["POST"])
@@ -44,7 +44,7 @@ def increment():
     paidList = []
     for input in ['0', '1', '2']:
         investment = float(request.form[input]) if request.form[input] else 0
-        currentPrice = float(session['options'][int(input)][-1])
+        currentPrice = float(session['options'][int(input)][2])
         currentPrices.append(currentPrice)
         amntShares = investment // currentPrice
         amntsShares.append(amntShares)
@@ -60,15 +60,20 @@ def increment():
         if amntsShares[int(input)] >= 1:
             priceList = ['null' for i in range(len(session['datesPast']) - 1)]
             priceList.append(currentPrices[int(input)])
-            session['ownedStocks'].append([session['options'][int(input)][0], int(amntsShares[int(input)]), priceList, len(session['ownedStocks'])])
+            graphColor = "rgb({red}, {green}, {blue})".format(red=round(rand.random() * 255),green=round(rand.random() * 255),blue=round(rand.random() * 255))
+            session['ownedStocks'].append([session['options'][int(input)][0], int(amntsShares[int(input)]), priceList, len(session['ownedStocks']), graphColor])
 
     currentDate = datetime.datetime.strptime(session['currentDate'][0], '%d %B %Y')
-    currentDate = currentDate.replace(day=(round((rand.random() * 27)) + 1), month=(round((rand.random() * 11)) + 1), year=(currentDate.year + round(rand.random() * 3) + 2))
+    currentDate = currentDate.replace(day=(round(rand.random() * 27) + 1), month=(round((rand.random() * 11)) + 1), year=(currentDate.year + round(rand.random() * 3) + 2))
     if currentDate >= datetime.datetime.today():
-        session['finished'] = True
-        for i in range(len(session['ownedStocks'])):
+        session['finished'][0] = True
+        print(session['ownedStocks'])
+        print("len = " + str(len(session['ownedStocks'])))
+        for i in range(len(session['ownedStocks'])-1, -1, -1):
+            print('running index: ' + str(i))
             session['budget'] = format(float(session['budget']) + session['ownedStocks'][i][1] * session['ownedStocks'][i][2][-1], '.2f')
             session['ownedStocks'].pop(i)
+        session['finished'][1] = float(session['budget']) >= 100000.00
         return redirect('/')
     session['currentDate'][0] = currentDate.strftime('%d %B %Y')
     session['currentDate'][1] = currentDate.strftime('%m/%d/%Y')
@@ -86,8 +91,14 @@ def increment():
 
 @app.route('/sell', methods=["POST"])
 def sell():
+    print(session['ownedStocks'])
+    print(request.form['sell'])
     session['budget'] = format(float(session['budget']) + session['ownedStocks'][int(request.form['sell'])][1] * session['ownedStocks'][int(request.form['sell'])][2][-1], '.2f')
     session['ownedStocks'].pop(int(request.form['sell']))
+    for idx, stock in enumerate(session['ownedStocks']):
+        stock[3] = idx
+    print(session['ownedStocks'])
+    print(request.form['sell'])
     return redirect('/')
 
 @app.route('/endGame', methods=["POST"])

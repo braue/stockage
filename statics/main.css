@@ -120,6 +120,33 @@ table {
 .new-stock-row {
     margin: 40px 0;
 }
+.new-stock-text {
+    display: inline;
+    cursor: pointer;
+    padding-bottom: 0.1em;
+    position: relative;
+}
+.new-stock-text::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.25s ease-out;
+}
+.new-stock-text:hover::before {
+    width: 100%;
+    left: 0;
+    right: auto;
+}
+.stock-name {
+    font-size: 1.5em !important;
+}
+.stock-price {
+    font-size: 0.8em !important;
+}
 .new-stock-input {
     color: white;
     width: 25%;
@@ -128,6 +155,7 @@ table {
     border-radius: 5px;
     border: none;
     outline: none;
+    margin-top: 6px;
 }
 #owned-stocks {
     margin: 0 auto;
@@ -157,6 +185,10 @@ button {
     color: white;
     cursor: pointer !important;
 }
+#description {
+    width: 75%;
+    margin: 70px auto;
+}
 
 /* Graph panel (right) */
 #graph-panel {
@@ -180,7 +212,7 @@ button {
     min-width: 200px;
 }
 
-#start-blur {
+.blur {
     position: absolute; 
     width: 100%; 
     height: 100%; 
@@ -188,7 +220,36 @@ button {
     z-index: 10;
 }
 
-#final-budget {
-    z-index: 11;
-    position: absolute;
+/* End game */
+#end-prompt {
+    position: absolute; 
+    width: 50%; 
+    height: 35%; 
+    max-width: 500px;
+    background-color: #191919; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    z-index: 11; 
+    border: 5px solid #353535; 
+    min-width: 200px;
+    font-family: Gidole;
+    color: white;
+}
+
+#end-budget {
+    font-size: 5em;
+    margin: 0 auto;
+    margin-top: 75px;
+    margin-bottom: 45px;
+    width: 50%;
+}
+
+#end-button {
+    display: block;
+    font-family: Gidole;
+    margin: 0 auto;
+    width: 50%;
+    height: 20%;
+    font-size: 2em;
 }

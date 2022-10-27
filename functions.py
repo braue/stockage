@@ -18,6 +18,10 @@ def getPrice(stock, date):
     currentPrice = format(round(hist['Close'].iloc[0], 2), '.2f')
     return currentPrice
 
+def getInfo(stock):
+    currentTicker = yf.Ticker(stock)
+    return currentTicker.info['longBusinessSummary'].replace("'", "")
+
 def getOptions(date):
     options = []
     existingStocks = []
@@ -28,8 +32,10 @@ def getOptions(date):
         potentialOption = existingStocks[rand.randrange(len(existingStocks))]
         try:
             currentPrice = getPrice(potentialOption, date)
-            options.append((potentialOption, len(options), currentPrice))
+            currentInfo = getInfo(potentialOption)
+            options.append((potentialOption, len(options), currentPrice, currentInfo))
             stockDate.pop(potentialOption)
+            existingStocks.pop(potentialOption)
         except:
             continue
     return options
