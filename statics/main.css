@@ -53,20 +53,20 @@ table {
 }
 * {
     scrollbar-width: auto;
-    scrollbar-color: #ffffff #353535;
+    scrollbar-color: #313131 #202020;
 }
 *::-webkit-scrollbar {
     width: 10px;
 }
 *::-webkit-scrollbar-track {
-    background: #353535;
+    background: #202020;
 }
 *::-webkit-scrollbar-thumb {
-    background-color: #ffffff;
+    background-color: #313131;
     border-radius: 10px;
 }
 *::-webkit-scrollbar-corner {
-    background-color: #353535;
+    background-color: #202020;
 }
 
 
@@ -83,7 +83,7 @@ table {
     min-width: 300px;
     color: white;
     font-family: Gidole;
-    background-color: #353535;
+    background-color: #202020;
     overflow: scroll;
     text-align: center;
     cursor: default;
@@ -91,14 +91,11 @@ table {
 #date-budget {
     margin: 0 auto;
     margin-top: 65px;
-    margin-bottom: 42px;
+    margin-bottom: 28px;
     width: 75%;
     text-align: center;
     font-size: 1.7em;
     line-height: 2em;
-}
-#date {
-    text-decoration: underline;
 }
 #dollar-fade {
     opacity: 0%;
@@ -109,16 +106,18 @@ table {
     transition: opacity 0.5s;
 }
 #budget {
-    margin-top: 30px;
+    margin-top: 15px;
 }
 #new-stocks {
     margin: 0px auto;
-    margin-bottom: 65px;
+    margin-bottom: 40px;
     width: 75%;
     text-align: left !important;
+    background-color: #313131;
+    border-radius: 15px;
 }
 .new-stock-row {
-    margin: 40px 0;
+    padding: 20px;
 }
 .new-stock-text {
     display: inline;
@@ -149,23 +148,29 @@ table {
 }
 .new-stock-input {
     color: white;
-    width: 25%;
+    width: 30%;
     float: right;
-    background-color: #191919;
-    border-radius: 5px;
+    background-color: #313131;
     border: none;
     outline: none;
-    margin-top: 6px;
+    height: 1.2em;
+    font-size: 1.1em;
+    text-align: center;
+    border-bottom: solid white;
+    border-width: 1px;
+    margin-top: 2px;
 }
 #owned-stocks {
     margin: 0 auto;
-    margin-bottom: 65px;
+    margin-bottom: 40px;
     width: 75%;
+    background-color: #313131;
+    border-radius: 15px;
 }
 .owned-stock-row {
     display: flex;
     justify-content: space-between;
-    margin: 45px 0;
+    padding: 15px;
 }
 .sell {
     width: 20%;
@@ -179,39 +184,46 @@ table {
     display: inline-block;
     font-size: 1.1em;
 }
-button {
-    background-color: #191919;
-    border: none;
-    color: white;
-    cursor: pointer !important;
-}
 #description {
     width: 75%;
-    margin: 70px auto;
+    margin: 40px auto;
 }
 
 /* Graph panel (right) */
 #graph-panel {
-    background-color: #191919;
+    background-color: #181818;
     height: 100%;
     width: 100%;
     flex-grow: 1;
 }
 
 /* Start game */
-#start-button {
+#start-prompt {
     position: absolute; 
     width: 15%; 
-    height: 10%; 
-    background-color: #191919; 
+    height: 13%; 
+    background-color: #181818; 
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%); 
     z-index: 11; 
-    border: 5px solid #353535; 
+    border: 5px solid #202020; 
     min-width: 200px;
+    min-height: 100px;
+    text-align: center;
+    color: white;
+    font-family: Gidole;
 }
-
+#goal {
+    margin: 25px auto;
+    width: 100%;
+}
+#start-button {
+    margin: 0 auto;
+    width: 50%;
+    height: 30%;
+    font-family: Gidole;
+}
 .blur {
     position: absolute; 
     width: 100%; 
@@ -223,33 +235,42 @@ button {
 /* End game */
 #end-prompt {
     position: absolute; 
-    width: 50%; 
-    height: 35%; 
-    max-width: 500px;
-    background-color: #191919; 
+    width: 20%; 
+    height: 20%; 
+    background-color: #181818; 
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%); 
     z-index: 11; 
-    border: 5px solid #353535; 
-    min-width: 200px;
-    font-family: Gidole;
+    border: 5px solid #202020; 
+    min-width: 300px;
+    min-height: 200px;
+    text-align: center;
     color: white;
-}
-
-#end-budget {
-    font-size: 5em;
-    margin: 0 auto;
-    margin-top: 75px;
-    margin-bottom: 45px;
-    width: 50%;
-}
-
-#end-button {
-    display: block;
     font-family: Gidole;
+}
+#end-budget {
+    margin: 25px auto;
+    width: 100%;
+    font-size: 3em;
+}
+.winorlose {
+    margin: 10px auto;
+}
+#end-button {
     margin: 0 auto;
     width: 50%;
-    height: 20%;
-    font-size: 2em;
+    height: 25%;
+    font-family: Gidole;
 }
+
+/* Other */
+button {
+    background-color: #181818;
+    border: none;
+    color: white;
+    cursor: pointer !important;
+    border-radius: 15px;
+}
+button:hover {
+    background-color: #313131;

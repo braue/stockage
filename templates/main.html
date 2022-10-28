@@ -1,11 +1,12 @@
 <html>
-
     <head>
         <title>Stockgame</title>
         <link href="/statics/main.css" rel="stylesheet" type="text/css"/>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-        <script> function description(desc) {
+        <script> 
+        function description(desc) {
             const descp = document.getElementById("description");
+            descp.style.color = 'white';
             if (descp.innerHTML.replace(/&amp;/g, '&') == desc) {
                 descp.innerHTML = '';
             } else {
@@ -14,7 +15,6 @@
         }
         </script>
     </head>
-
     <body id="app">
         <div id="action-panel">
             <div id="date-budget">
@@ -23,7 +23,7 @@
                 {% endif %}
                 <h1 id="budget"><span id="dollar-fade">$</span>{{ budget }}</h1>
             </div>
-            <form>
+            <form autocomplete="off">
                 <div id="new-stocks">
                     {% for option in options: %}
                     <div class="new-stock-row">
@@ -47,8 +47,14 @@
                 <button type="submit" id="increment" formaction="/increment" formmethod="post">Increment</button>
             </form>
             <p id="description">
-
             </p>
+            <script>
+                {% if error: %}
+                description('{{ error[0] }}');
+                {% endif %}
+                const desc = document.getElementById("description");
+                desc.style.color = 'red';
+            </script>
         </div>
 
         <div id="graph-panel">
@@ -131,9 +137,13 @@
         </div>
         {% if not activeGame: %}
         <div class="blur"></div>
-        <form action="/startGame" method="post">
-            <button type="submit" id="start-button">Start Game</button>
-        </form>
+            <form action="/startGame" method="post">
+                <div id="start-prompt">
+                    <h2 id="goal">Goal: accumulate at least $100000</h2>
+                    <button type="submit" id="start-button">Start Game</button>
+                </div>
+            </form>
+        </div>
         {% endif %}
         {% if finished[0]: %}
         <div class="blur"></div>
