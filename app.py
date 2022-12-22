@@ -54,6 +54,9 @@ def increment():
     investments = []
     paidList = []
     for input in ['0', '1', '2']:
+        if request.form[input] and (not request.form[input].isnumeric()):
+            session['error'].append("At least one of your inputs is not valid")
+            return redirect('/')
         investment = float(request.form[input]) if request.form[input] else 0
         investments.append(investment)
         currentPrice = float(session['options'][int(input)][2])
