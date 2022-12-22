@@ -1,7 +1,7 @@
-# stockpile
+# stockage
 
 ## what
-Stockpile is a stock trading game that utilizes historical stock data to allow you to simulate an investment journey spanning the 70s/80s to the current day.
+Stockage is a stock trading game that utilizes historical stock data to allow you to simulate an investment journey spanning the 70s/80s to the current day.
 
 ## how
 - Flask: connects Python with HTML.
