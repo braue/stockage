@@ -7,9 +7,9 @@ import random as rand
 with open("./data/stockdata.json") as infile:
    stockData = json.load(infile)
 
-# Generate initial date that ranges from 1970-1980
+# Generate initial date that ranges from 1974-1980
 def getInitialDate():
-    currentDate = datetime.date(1970 + round((rand.random() * 10)), round((rand.random() * 11)) + 1, round((rand.random() * 27)) + 1)
+    currentDate = datetime.date(1974 + round((rand.random() * 6)), round((rand.random() * 11)) + 1, round((rand.random() * 27)) + 1)
     return currentDate
 
 # Retrieve price given a stock name as well as the date
